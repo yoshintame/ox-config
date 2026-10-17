@@ -42,9 +42,22 @@ Import groups, each separated by a blank line: builtin modules, packages, `npm:`
 
 Both tools load TypeScript configs through Node.js 22.18+ or 24+.
 
+[Vite+](https://viteplus.dev) reads the same objects from the `lint` and `fmt` blocks of `vite.config.ts` (not yet tried in a project):
+
+```ts
+import { oxfmt } from '@yoshintame/ox-config/oxfmt'
+import { base, react } from '@yoshintame/ox-config/oxlint'
+import { defineConfig } from 'vite-plus'
+
+export default defineConfig({
+  lint: { extends: [base, react] },
+  fmt: oxfmt({ tailwind: true }),
+})
+```
+
 ## Differences from the Biome preset
 
 - oxfmt sorts import declarations but not the names inside `{ … }`; the oxlint `sort-imports` rule reports and fixes them, export lists stay unsorted.
 - oxfmt resolves no `tsconfig.json` paths: aliases other than `~/`, `@/` and `#` go to `sortImports.internalPattern`.
 - `noUnusedTemplateLiteral` has no equivalent; `unicorn/filename-case` has no ASCII-only option; Tailwind sorting matches function names exactly, so `tw.*` is gone; the Biome `react` preset is split into the oxlint `react` preset and the oxfmt `tailwind` option.
-- oxfmt also formats JSON, YAML, TOML and Markdown, including code blocks inside Markdown, and sorts `package.json` keys; put `<!-- prettier-ignore -->` before a block that must stay verbatim.
+- oxfmt also formats JSON, YAML, TOML and Markdown, including code blocks inside Markdown; put `<!-- prettier-ignore -->` before a block that must stay verbatim. Its `package.json` key sorting is off: the order is fixed and puts `scripts` and dependencies far down.

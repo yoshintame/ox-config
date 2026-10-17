@@ -1,35 +1,9 @@
-import type {
-  CustomGroupItemConfig,
-  OxfmtConfig,
-  SortGroupItemConfig,
-} from 'oxfmt'
+import type { OxfmtConfig } from 'oxfmt'
 
 export interface OxfmtOptions {
   fsd?: boolean
   tailwind?: boolean
 }
-
-const groups = (fsd: boolean): SortGroupItemConfig[] => [
-  'builtin',
-  'external',
-  'protocol',
-  ...(fsd ? ['shared'] : []),
-  ['internal', 'subpath'],
-  ['parent', 'sibling', 'index'],
-  'url',
-  'unknown',
-]
-
-const customGroups = (fsd: boolean): CustomGroupItemConfig[] => [
-  {
-    groupName: 'protocol',
-    elementNamePattern: ['npm:**', 'jsr:**', 'workspace:**'],
-  },
-  ...(fsd
-    ? [{ groupName: 'shared', elementNamePattern: ['@/shared/**'] }]
-    : []),
-  { groupName: 'url', elementNamePattern: ['https://**', 'http://**'] },
-]
 
 export const oxfmt = ({
   fsd = false,
@@ -38,7 +12,29 @@ export const oxfmt = ({
   printWidth: 80,
   semi: false,
   singleQuote: true,
-  sortImports: { groups: groups(fsd), customGroups: customGroups(fsd) },
+  sortPackageJson: false,
+  sortImports: {
+    groups: [
+      'builtin',
+      'external',
+      'protocol',
+      ...(fsd ? ['shared'] : []),
+      ['internal', 'subpath'],
+      ['parent', 'sibling', 'index'],
+      'url',
+      'unknown',
+    ],
+    customGroups: [
+      {
+        groupName: 'protocol',
+        elementNamePattern: ['npm:**', 'jsr:**', 'workspace:**'],
+      },
+      ...(fsd
+        ? [{ groupName: 'shared', elementNamePattern: ['@/shared/**'] }]
+        : []),
+      { groupName: 'url', elementNamePattern: ['https://**', 'http://**'] },
+    ],
+  },
   ...(tailwind && {
     sortTailwindcss: { functions: ['cn', 'clsx', 'cva', 'tw'] },
   }),
