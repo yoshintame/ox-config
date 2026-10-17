@@ -1,5 +1,7 @@
 import type { OxfmtConfig } from 'oxfmt'
 
+import { ignorePatterns } from './ignore-patterns.ts'
+
 export interface OxfmtOptions {
   fsd?: boolean
   tailwind?: boolean
@@ -38,5 +40,5 @@ export const oxfmt = ({
   ...(tailwind && {
     sortTailwindcss: { functions: ['cn', 'clsx', 'cva', 'tw'] },
   }),
-  ignorePatterns: ['CHANGELOG.md', '**/generated/**'],
+  ignorePatterns: ['CHANGELOG.md', ...ignorePatterns],
 })

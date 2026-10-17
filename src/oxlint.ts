@@ -1,5 +1,7 @@
 import type { OxlintConfig } from 'oxlint'
 
+export { ignorePatterns } from './ignore-patterns.ts'
+
 export const base: OxlintConfig = {
   plugins: ['typescript', 'unicorn', 'oxc', 'import'],
   categories: {
@@ -27,7 +29,6 @@ export const base: OxlintConfig = {
     'unicorn/filename-case': ['error', { case: 'kebabCase' }],
     'unicorn/prefer-number-properties': 'error',
   },
-  ignorePatterns: ['**/generated/**'],
 }
 
 export const react: OxlintConfig = {
