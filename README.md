@@ -35,6 +35,9 @@ bun add -d oxlint-tsgolint
 ```
 
 ```ts
+import { base, ignorePatterns, strict } from '@yoshintame/ox-config/oxlint'
+import { defineConfig } from 'oxlint'
+
 export default defineConfig({
   extends: [base, strict],
   ignorePatterns,
@@ -43,8 +46,8 @@ export default defineConfig({
 ```
 
 - tsgolint brings its own TypeScript 7 compiler, so the project may stay on TypeScript 5. `options.typeCheck` reports compiler errors through the same program and is left to the project.
-- `base` and `strict` split the typescript-eslint `strict-type-checked` set: `base` takes the rules that need no type information, `strict` the type-aware ones. Each lists its rules itself, including those the `base` categories already enable, so moving a rule between oxlint categories does not drop it. On top of that set: `import/no-cycle` in `base`, `switch-exhaustiveness-check` and `strict-boolean-expressions` in `strict`.
-- With type-aware mode the `base` categories also bring `no-generated-empty-object-type`, `no-unnecessary-type-conversion`, `no-useless-default-assignment` and `require-array-sort-compare`. Two of their type-aware rules are off: `no-unsafe-type-assertion`, which typescript-eslint keeps out of `strict-type-checked` while `no-unnecessary-type-assertion` reports redundant casts, and `consistent-return`, which rejects a `T | void` callback that returns a value on one branch only.
+- `base` and `strict` split the typescript-eslint `strict-type-checked` set: `base` takes the rules that need no type information, `strict` the type-aware ones. Each lists its rules itself, including those the `base` categories already enable, so moving a rule between oxlint categories does not drop it. On top of that set: `import/no-cycle` in `base`, `switch-exhaustiveness-check` and `strict-boolean-expressions` in `strict`. `no-unsafe-enum-assignment` has no oxlint equivalent yet.
+- With type-aware mode the `base` categories also bring `require-array-sort-compare`. `base` turns off two of their type-aware rules: `no-unsafe-type-assertion`, which typescript-eslint keeps out of `strict-type-checked` while `no-unnecessary-type-assertion` reports redundant casts, and `consistent-return`, which rejects a `T | void` callback that returns a value on one branch only.
 - Differences from typescript-eslint: a number may go into a template literal; `strict-boolean-expressions` allows a nullable string, as it allows a plain one; `@ts-expect-error` needs no description; a void call may be an arrow function body.
 - Test files (`*.test.*`, `*.spec.*`) may use non-null assertions and `delete` with computed keys (`base`), unbound methods and the `any` that asymmetric matchers such as `expect.objectContaining` return (`strict`).
 
