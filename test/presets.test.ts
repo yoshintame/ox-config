@@ -9,6 +9,14 @@ const dir = mkdtempSync(join(tmpdir(), 'ox-config-'))
 afterAll(() => rmSync(dir, { recursive: true, force: true }))
 
 writeFileSync(join(dir, 'a.tsx'), 'export const a = <div />\n')
+writeFileSync(
+  join(dir, 'jsx.d.ts'),
+  'declare namespace JSX {\n  type Element = object\n  interface IntrinsicElements {\n    div: object\n  }\n}\n',
+)
+writeFileSync(
+  join(dir, 'tsconfig.json'),
+  JSON.stringify({ compilerOptions: { jsx: 'preserve', strict: true } }),
+)
 mkdirSync(join(dir, 'generated'))
 writeFileSync(
   join(dir, 'generated', 'g.ts'),
@@ -21,12 +29,23 @@ const loads = (tool: 'oxlint' | 'oxfmt', config: string) => {
     tool === 'oxfmt' ? ['--check', 'a.tsx'] : ['a.tsx', 'generated/g.ts']
   const result = Bun.spawnSync(
     [join(root, 'node_modules', '.bin', tool), ...argv],
-    { cwd: dir },
+    {
+      cwd: dir,
+      env: {
+        ...process.env,
+        OXLINT_TSGOLINT_PATH: join(root, 'node_modules', '.bin', 'tsgolint'),
+      },
+    },
   )
   return result.exitCode
 }
 
-test.each([[['base']], [['base', 'react']]])('oxlint loads %p', (presets) => {
+test.each([
+  [['base']],
+  [['base', 'react']],
+  [['base', 'strict']],
+  [['base', 'react', 'strict']],
+])('oxlint loads %p', (presets) => {
   const code = loads(
     'oxlint',
     `import { ${presets.join(', ')}, ignorePatterns } from '${join(root, 'src/oxlint.ts')}'

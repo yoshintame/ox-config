@@ -9,6 +9,7 @@ bun add -d @yoshintame/ox-config oxlint oxfmt
 | Export                         | Contents                                                                                                                     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
 | `@yoshintame/ox-config/oxlint` | `base`: `correctness` and `suspicious` categories, the rules carried over from the Biome preset, sorted names inside `{ … }` |
+|                                | `strict`: type-aware mode, the typescript-eslint `strict-type-checked` rules plus exhaustive `switch` and strict conditions  |
 |                                | `react`: react plugin, self-closing elements, no React import for JSX                                                        |
 | `@yoshintame/ox-config/oxfmt`  | `oxfmt(options)`: single quotes, no semicolons, 80 columns, import groups, `CHANGELOG.md` and `**/generated/**` ignored      |
 
@@ -26,6 +27,26 @@ export default defineConfig({
 ```
 
 oxlint does not inherit `ignorePatterns` through `extends`, so the shared list (`**/generated/**`) is spread into the project config itself.
+
+`strict` goes on top of `base` and turns on `options.typeAware`, which needs the `oxlint-tsgolint` package:
+
+```sh
+bun add -d oxlint-tsgolint
+```
+
+```ts
+export default defineConfig({
+  extends: [base, strict],
+  ignorePatterns,
+  options: { typeCheck: true },
+})
+```
+
+- tsgolint brings its own TypeScript 7 compiler, so the project may stay on TypeScript 5. `options.typeCheck` reports compiler errors through the same program and is left to the project.
+- `strict` lists every `strict-type-checked` rule itself, including those the `base` categories already enable, so moving a rule between oxlint categories does not drop it. On top of that list: `switch-exhaustiveness-check`, `strict-boolean-expressions` and `import/no-cycle`.
+- With type-aware mode the `base` categories also bring `no-generated-empty-object-type`, `no-unnecessary-type-conversion`, `no-useless-default-assignment` and `require-array-sort-compare`. Two of their type-aware rules are off: `no-unsafe-type-assertion`, which typescript-eslint keeps out of `strict-type-checked` while `no-unnecessary-type-assertion` reports redundant casts, and `consistent-return`, which rejects a `T | void` callback that returns a value on one branch only.
+- Differences from typescript-eslint: a number may go into a template literal; `strict-boolean-expressions` allows a nullable string, as it allows a plain one; `@ts-expect-error` needs no description; a void call may be an arrow function body.
+- Test files (`*.test.*`, `*.spec.*`) may use non-null assertions, `delete` with computed keys, unbound methods and the `any` that asymmetric matchers such as `expect.objectContaining` return.
 
 `oxfmt.config.ts`:
 

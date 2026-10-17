@@ -43,7 +43,13 @@
   },
   "peerDependencies": {
     "oxfmt": ">=0.72.0 <1",
-    "oxlint": "^1.87.0"
+    "oxlint": "^1.87.0",
+    "oxlint-tsgolint": "^7.0.2004"
+  },
+  "peerDependenciesMeta": {
+    "oxlint-tsgolint": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
@@ -52,6 +58,7 @@
     "@types/bun": "^1.3.0",
     "oxfmt": "0.72.0",
     "oxlint": "1.87.0",
+    "oxlint-tsgolint": "7.0.2004",
     "publint": "^0.3.12",
     "semantic-release": "^25.0.9",
     "typescript": "^5.9.3"
