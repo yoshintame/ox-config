@@ -1,5 +1,5 @@
 import { defineConfig } from 'oxfmt'
 
-import { base } from './src/oxfmt.ts'
+import { oxfmt } from './src/oxfmt.ts'
 
-export default defineConfig(base)
+export default defineConfig(oxfmt())

@@ -12,6 +12,7 @@ export const base: OxlintConfig = {
   },
   rules: {
     'default-param-last': 'error',
+    'import/no-unassigned-import': 'off',
     'no-else-return': 'error',
     'no-param-reassign': 'error',
     'no-shadow': 'off',
@@ -26,11 +27,13 @@ export const base: OxlintConfig = {
     'unicorn/filename-case': ['error', { case: 'kebabCase' }],
     'unicorn/prefer-number-properties': 'error',
   },
+  ignorePatterns: ['**/generated/**'],
 }
 
 export const react: OxlintConfig = {
   plugins: ['react'],
   rules: {
+    'react/react-in-jsx-scope': 'off',
     'react/self-closing-comp': 'error',
   },
 }

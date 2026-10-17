@@ -31,15 +31,15 @@ import { ${presets.join(', ')} } from '${join(root, 'src/oxlint.ts')}'
 export default { extends: [${presets.join(', ')}] }
 `
 
-const oxfmtConfig = (presets: string[]) => `
-import { ${presets.join(', ')} } from '${join(root, 'src/oxfmt.ts')}'
-export default { ${presets.map((p) => `...${p}`).join(', ')} }
+const oxfmtConfig = (options: object = {}) => `
+import { oxfmt } from '${join(root, 'src/oxfmt.ts')}'
+export default oxfmt(${JSON.stringify(options)})
 `
 
 test('oxlint base passes clean code and reports a ported Biome rule', () => {
   const dir = project({
     'oxlint.config.ts': oxlintConfig(['base']),
-    'clean.ts': 'export const answer = 42\n',
+    'clean.ts': "import './styles.css'\nexport const answer = 42\n",
     'two-vars.ts': 'let a = 1, b = 2\nexport { a, b }\n',
   })
 
@@ -59,11 +59,14 @@ test('oxlint base sorts names inside braces', () => {
   expect(run(dir, [bin('oxlint'), 'names.ts']).output).toContain('sort-imports')
 })
 
-test('oxlint react reports elements without children that are not self-closing', () => {
+test('oxlint react passes clean JSX and reports elements that are not self-closing', () => {
   const dir = project({
     'oxlint.config.ts': oxlintConfig(['base', 'react']),
+    'clean.tsx': 'export const View = () => <div />\n',
     'view.tsx': 'export const View = () => <div></div>\n',
   })
+
+  expect(run(dir, [bin('oxlint'), 'clean.tsx']).code).toBe(0)
 
   const result = run(dir, [bin('oxlint'), 'view.tsx'])
   expect(result.code).toBe(1)
@@ -81,7 +84,7 @@ export const all = [b, shared, app, x, readFile, lib]
 
 test('oxfmt base formats and groups imports like the Biome preset', () => {
   const dir = project({
-    'oxfmt.config.ts': oxfmtConfig(['base']),
+    'oxfmt.config.ts': oxfmtConfig(),
     'a.ts': source,
   })
 
@@ -103,7 +106,7 @@ export const all = [b, shared, app, x, readFile, lib]
 
 test('oxfmt fsd puts @/shared before other aliases', () => {
   const dir = project({
-    'oxfmt.config.ts': oxfmtConfig(['base', 'fsd']),
+    'oxfmt.config.ts': oxfmtConfig({ fsd: true }),
     'a.ts': source,
   })
 
@@ -115,7 +118,7 @@ test('oxfmt fsd puts @/shared before other aliases', () => {
 
 test('oxfmt tailwind sorts classes inside cn()', () => {
   const dir = project({
-    'oxfmt.config.ts': oxfmtConfig(['base', 'tailwind']),
+    'oxfmt.config.ts': oxfmtConfig({ tailwind: true }),
     'a.ts': "export const c = cn('p-4 flex')\n",
   })
 

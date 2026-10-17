@@ -1,1 +1,1 @@
-amends "package://github.com/yoshintame/hk-config/releases/download/v0.1.0/hk-config@0.1.0#/ts.pkl"
+amends "package://github.com/yoshintame/hk-config/releases/download/v0.2.0/hk-config@0.2.0#/lib.pkl"

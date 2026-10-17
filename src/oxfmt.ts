@@ -1,47 +1,46 @@
-import type { OxfmtConfig, SortImportsConfig } from 'oxfmt'
+import type {
+  CustomGroupItemConfig,
+  OxfmtConfig,
+  SortGroupItemConfig,
+} from 'oxfmt'
 
-const imports = {
-  groups: [
-    'builtin',
-    'external',
-    'protocol',
-    ['internal', 'subpath'],
-    ['parent', 'sibling', 'index'],
-    'url',
-    'unknown',
-  ],
-  customGroups: [
-    {
-      groupName: 'protocol',
-      elementNamePattern: ['npm:**', 'jsr:**', 'workspace:**'],
-    },
-    { groupName: 'url', elementNamePattern: ['https://**', 'http://**'] },
-  ],
-} satisfies SortImportsConfig
+export interface OxfmtOptions {
+  fsd?: boolean
+  tailwind?: boolean
+}
 
-export const base: OxfmtConfig = {
+const groups = (fsd: boolean): SortGroupItemConfig[] => [
+  'builtin',
+  'external',
+  'protocol',
+  ...(fsd ? ['shared'] : []),
+  ['internal', 'subpath'],
+  ['parent', 'sibling', 'index'],
+  'url',
+  'unknown',
+]
+
+const customGroups = (fsd: boolean): CustomGroupItemConfig[] => [
+  {
+    groupName: 'protocol',
+    elementNamePattern: ['npm:**', 'jsr:**', 'workspace:**'],
+  },
+  ...(fsd
+    ? [{ groupName: 'shared', elementNamePattern: ['@/shared/**'] }]
+    : []),
+  { groupName: 'url', elementNamePattern: ['https://**', 'http://**'] },
+]
+
+export const oxfmt = ({
+  fsd = false,
+  tailwind = false,
+}: OxfmtOptions = {}): OxfmtConfig => ({
   printWidth: 80,
   semi: false,
   singleQuote: true,
-  sortImports: imports,
+  sortImports: { groups: groups(fsd), customGroups: customGroups(fsd) },
+  ...(tailwind && {
+    sortTailwindcss: { functions: ['cn', 'clsx', 'cva', 'tw'] },
+  }),
   ignorePatterns: ['CHANGELOG.md', '**/generated/**'],
-}
-
-export const fsd: OxfmtConfig = {
-  sortImports: {
-    ...imports,
-    groups: imports.groups.flatMap((group) =>
-      group === 'protocol' ? [group, 'shared'] : [group],
-    ),
-    customGroups: [
-      ...imports.customGroups,
-      { groupName: 'shared', elementNamePattern: ['@/shared/**'] },
-    ],
-  },
-}
-
-export const tailwind: OxfmtConfig = {
-  sortTailwindcss: {
-    functions: ['cn', 'clsx', 'cva', 'tw'],
-  },
-}
+})
