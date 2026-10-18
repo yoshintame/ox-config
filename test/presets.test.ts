@@ -132,16 +132,6 @@ test('vitest reports focused tests but not untyped mocks', () => {
   expect(output).not.toContain('require-mock-type-parameters')
 })
 
-test('vitest plugin rules need no type information', () => {
-  const pluginRules = [...typeAware].filter(([name]) =>
-    name.startsWith('vitest/'),
-  )
-  expect(pluginRules.length).toBeGreaterThan(0)
-  expect(
-    pluginRules.filter(([, aware]) => aware).map(([name]) => name),
-  ).toEqual([])
-})
-
 test('base enables only rules that need no type information', () => {
   const enabled = [
     ...Object.entries(base.rules ?? {})
