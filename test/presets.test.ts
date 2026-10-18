@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 
-import { base, strict, vitest } from '../src/oxlint.ts'
+import { base, strict } from '../src/oxlint.ts'
 
 interface RuleInfo {
   scope: string
@@ -132,11 +132,13 @@ test('vitest reports focused tests but not untyped mocks', () => {
   expect(output).not.toContain('require-mock-type-parameters')
 })
 
-test('vitest needs no type information', () => {
+test('vitest plugin rules need no type information', () => {
+  const pluginRules = [...typeAware].filter(([name]) =>
+    name.startsWith('vitest/'),
+  )
+  expect(pluginRules.length).toBeGreaterThan(0)
   expect(
-    Object.keys(vitest.rules ?? {}).filter(
-      (name) => typeAware.get(name) !== false,
-    ),
+    pluginRules.filter(([, aware]) => aware).map(([name]) => name),
   ).toEqual([])
 })
 
