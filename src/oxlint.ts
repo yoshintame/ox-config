@@ -164,3 +164,10 @@ export const react: OxlintConfig = {
     'react/self-closing-comp': 'error',
   },
 }
+
+export const vitest: OxlintConfig = {
+  plugins: ['vitest'],
+  rules: {
+    'vitest/require-mock-type-parameters': 'off',
+  },
+}

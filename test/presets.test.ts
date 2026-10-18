@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 
-import { base, strict } from '../src/oxlint.ts'
+import { base, strict, vitest } from '../src/oxlint.ts'
 
 interface RuleInfo {
   scope: string
@@ -43,6 +43,17 @@ writeFileSync(
   return Promise.resolve(1)
 }
 load()
+`,
+)
+writeFileSync(
+  join(dir, 'focused.test.ts'),
+  `import { expect, test, vi } from 'vitest'
+
+test.only('mock', () => {
+  const callback = vi.fn()
+  callback()
+  expect(callback).toHaveBeenCalled()
+})
 `,
 )
 writeFileSync(join(dir, 'relaxed.ts'), relaxedInTests)
@@ -95,6 +106,8 @@ test.each([
   [['base', 'react']],
   [['base', 'strict']],
   [['base', 'react', 'strict']],
+  [['base', 'vitest']],
+  [['base', 'strict', 'vitest']],
 ])('oxlint loads %p', (presets) => {
   useOxlintPresets(presets)
   expect(lint(['a.tsx', 'generated/g.ts']).exitCode).toBe(0)
@@ -110,6 +123,21 @@ test('strict runs type-aware rules and relaxes them in test files', () => {
     'no-non-null-assertion',
   )
   expect(lint(['relaxed.test.ts']).exitCode).toBe(0)
+})
+
+test('vitest reports focused tests but not untyped mocks', () => {
+  useOxlintPresets(['base', 'vitest'])
+  const output = lint(['focused.test.ts']).stdout.toString()
+  expect(output).toContain('no-focused-tests')
+  expect(output).not.toContain('require-mock-type-parameters')
+})
+
+test('vitest needs no type information', () => {
+  expect(
+    Object.keys(vitest.rules ?? {}).filter(
+      (name) => typeAware.get(name) !== false,
+    ),
+  ).toEqual([])
 })
 
 test('base enables only rules that need no type information', () => {
