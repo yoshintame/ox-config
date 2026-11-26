@@ -44,10 +44,14 @@
   "peerDependencies": {
     "oxfmt": ">=0.72.0 <1",
     "oxlint": "^1.87.0",
-    "oxlint-tsgolint": "^7.0.2004"
+    "oxlint-tsgolint": "^7.0.2004",
+    "svelte": "^5.0.0"
   },
   "peerDependenciesMeta": {
     "oxlint-tsgolint": {
+      "optional": true
+    },
+    "svelte": {
       "optional": true
     }
   },
@@ -61,6 +65,7 @@
     "oxlint-tsgolint": "7.0.2004",
     "publint": "^0.3.12",
     "semantic-release": "^25.0.9",
+    "svelte": "^5.59.2",
     "typescript": "^5.9.3"
   },
   "release": {

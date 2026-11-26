@@ -3,6 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 
+import type { OxfmtOptions } from '../src/oxfmt.ts'
 import { base, strict } from '../src/oxlint.ts'
 
 interface RuleInfo {
@@ -58,6 +59,34 @@ test.only('mock', () => {
 )
 writeFileSync(join(dir, 'relaxed.ts'), relaxedInTests)
 writeFileSync(join(dir, 'relaxed.test.ts'), relaxedInTests)
+const formattedSvelte = `<script lang="ts">
+  import { page } from '$app/state'
+  import { mount } from 'svelte'
+
+  import { label } from '#lib/label.ts'
+
+  import { count } from './count.ts'
+
+  const parts = [page, mount, label, count]
+</script>
+
+<p>{parts.length}</p>
+`
+
+writeFileSync(join(dir, 'formatted.svelte'), formattedSvelte)
+writeFileSync(
+  join(dir, 'unformatted.svelte'),
+  `<script lang="ts">
+  import { count } from './count.ts'
+  import { label } from '#lib/label.ts'
+  import { mount } from 'svelte'
+  import { page } from '$app/state'
+
+  const parts = [page, mount, label, count];
+</script>
+<p>{parts.length}</p>
+`,
+)
 mkdirSync(join(dir, 'generated'))
 writeFileSync(
   join(dir, 'generated', 'g.ts'),
@@ -152,17 +181,38 @@ test('strict holds only type-aware rules', () => {
   expect(names.filter((name) => typeAware.get(name) !== true)).toEqual([])
 })
 
-test.each([[{}], [{ fsd: true, tailwind: true }]])(
-  'oxfmt loads %p',
-  (options) => {
-    writeFileSync(
-      join(dir, 'oxfmt.config.ts'),
-      `import { oxfmt } from '${join(root, 'src/oxfmt.ts')}'
+const useOxfmt = (options: OxfmtOptions) =>
+  writeFileSync(
+    join(dir, 'oxfmt.config.ts'),
+    `import { oxfmt } from '${join(root, 'src/oxfmt.ts')}'
 export default oxfmt(${JSON.stringify(options)})
 `,
-    )
-    expect(
-      Bun.spawnSync([bin('oxfmt'), '--check', 'a.tsx'], { cwd: dir }).exitCode,
-    ).toBe(0)
+  )
+
+const formatCheck = (file: string) =>
+  Bun.spawnSync([bin('oxfmt'), '--check', file], { cwd: dir }).exitCode
+
+test.each([[{}], [{ fsd: true, svelte: true, tailwind: true }]])(
+  'oxfmt loads %p',
+  (options) => {
+    useOxfmt(options)
+    expect(formatCheck('a.tsx')).toBe(0)
   },
 )
+
+test('oxfmt checks .svelte files only with svelte', () => {
+  useOxfmt({})
+  expect(formatCheck('unformatted.svelte')).not.toBe(0)
+  useOxfmt({ svelte: true })
+  expect(formatCheck('formatted.svelte')).toBe(0)
+  expect(formatCheck('unformatted.svelte')).not.toBe(0)
+})
+
+test('oxfmt sorts import groups inside .svelte scripts', () => {
+  useOxfmt({ svelte: true })
+  const formatted = Bun.spawnSync(
+    [bin('oxfmt'), '--stdin-filepath', 'unformatted.svelte'],
+    { cwd: dir, stdin: Bun.file(join(dir, 'unformatted.svelte')) },
+  )
+  expect(formatted.stdout.toString()).toBe(formattedSvelte)
+})

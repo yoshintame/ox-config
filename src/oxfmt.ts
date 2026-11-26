@@ -4,11 +4,13 @@ import { ignorePatterns } from './ignore-patterns.ts'
 
 export interface OxfmtOptions {
   fsd?: boolean
+  svelte?: boolean
   tailwind?: boolean
 }
 
 export const oxfmt = ({
   fsd = false,
+  svelte = false,
   tailwind = false,
 }: OxfmtOptions = {}): OxfmtConfig => ({
   printWidth: 80,
@@ -37,6 +39,7 @@ export const oxfmt = ({
       { groupName: 'url', elementNamePattern: ['https://**', 'http://**'] },
     ],
   },
+  ...(svelte && { svelte: true }),
   ...(tailwind && {
     sortTailwindcss: { functions: ['cn', 'clsx', 'cva', 'tw'] },
   }),
