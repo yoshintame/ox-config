@@ -19,7 +19,11 @@
       "peerDependencies": {
         "oxfmt": ">=0.72.0 <1",
         "oxlint": "^1.87.0",
+        "oxlint-tsgolint": "^7.0.2004",
       },
+      "optionalPeers": [
+        "oxlint-tsgolint",
+      ],
     },
   },
   "packages": {
