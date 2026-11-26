@@ -65,9 +65,12 @@ export default defineConfig(oxfmt({ fsd: true, tailwind: true }))
 | Option     | Default | Effect                                                                    |
 | ---------- | ------- | ------------------------------------------------------------------------- |
 | `fsd`      | `false` | `@/shared/**` as its own import group before the other aliases            |
+| `svelte`   | `false` | `.svelte` files through the `prettier-plugin-svelte` bundled in oxfmt     |
 | `tailwind` | `false` | Tailwind class sorting in `class`, `className`, `cn`, `clsx`, `cva`, `tw` |
 
 Import groups, each separated by a blank line: builtin modules, packages, `npm:` / `jsr:` / `workspace:`, aliases (`~/`, `@/`, `#`, subpath imports), relative paths, URLs.
+
+`svelte` needs the `svelte` package in the project: oxfmt does not bundle it. The import groups apply inside `<script>` as well: SvelteKit's `$app/*` and `$env/*` modules sort with the packages, and `#lib/*`, the subpath import that replaces `$lib` in SvelteKit 3, with the aliases. `$lib` gets no group of its own. hk's builtin `oxfmt` step leaves `*.svelte` out of its glob; the `svelte.pkl` preset of `hk-config` adds it.
 
 Both tools load TypeScript configs through Node.js 22.18+ or 24+.
 
